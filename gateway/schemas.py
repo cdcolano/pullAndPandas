@@ -28,19 +28,32 @@ class PrendasCreate(BaseModel):
     precio: float
     nombre:str
     marca:str
-    img:str
-    stocks: List[Stock]
+    # img:str
+    # stocks: List[Stock]
 
 class PrendasUpdate(BaseModel):
     description: str
     precio: float
     nombre:str
     marca:str
-    img:str
 
 class StockUpdate(BaseModel):
     size:str
     quantity:int
+
+
+class UserSignin(BaseModel):
+    email: str
+    password: str
+
+class UserSignup(BaseModel):
+    email: str
+    name:str
+    password: str
+    weight:float
+    edad:int
+    height:int
+
 
 class EmployeeLogon(BaseModel):
     id: int

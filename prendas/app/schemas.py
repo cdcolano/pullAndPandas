@@ -10,6 +10,24 @@ class Stock(BaseModel):
     size:str
     quantity:int
 
+class Valoracion(BaseModel):
+    valor:int
+    email:str
+
+class ComentarioInput(BaseModel):
+    text:str
+
+class Comentario(BaseModel):
+    text:str
+    email:str
+    fullName:str
+    avatarUrl:str
+
+class User(BaseModel):
+    id_cliente: int
+    email: str
+    nombre: str
+
 class Prenda(BaseModel):
     id_prenda: int
     nombre:str
@@ -23,21 +41,22 @@ class Prenda(BaseModel):
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: int}
 
+class UpdateImage(BaseModel):
+    img:str
 
 class PrendasCreate(BaseModel):
     description: str
     precio: float
     nombre:str
     marca:str
-    img:str
-    stocks: List[Stock]
+    # img:str
+    # stocks: List[Stock]
 
 class PrendasUpdate(BaseModel):
     description: str
     precio: float
     nombre:str
     marca:str
-    img:str
 
 class StockUpdate(BaseModel):
     size:str

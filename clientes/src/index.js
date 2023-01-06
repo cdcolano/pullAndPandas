@@ -28,7 +28,11 @@ app.use(morgan("dev"));
 app.use(cors());
 app.use('/clientes',clienteRouter);
 app.use('/api-docs',swaggerUI.serve,swaggerUI.setup(docs));
-
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "localhost:3000");
+    res.header("Access-Control-Allow-Origin", "http://localhost:3000");
+    next();
+  });
 
 //initialize the app.
 async function initialize(){    

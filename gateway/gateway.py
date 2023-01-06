@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from fastapi import FastAPI, File, UploadFile
 from typing import List
-from schemas import Prenda
+from schemas import Prenda,UserSignin
 from fastapi.responses import RedirectResponse, HTMLResponse
 import os
 import fastapi
@@ -70,6 +70,14 @@ def getImg(*, prenda_id:int,request: Request) -> FileResponse:
 
 
 
+@api_router.post("/clientes/signin", status_code=200)
+def siginClient(*, user_signin:UserSignin ) -> FileResponse:
+    redirect_url='http://localhost:8001/clientes/signin'
+    respuesta = requests.post(
+                url=redirect_url
+                json=user_signin
+    )
+    return respuesta
 
 # New addition, path parameter
 # # https://fastapi.tiangolo.com/tutorial/path-params/

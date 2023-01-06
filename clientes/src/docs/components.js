@@ -1,11 +1,33 @@
 
 module.exports = {
     components:{
+        securitySchemes: {       
+        bearerAuth:{        
+            type: 'http',
+            scheme: 'bearer',
+            bearerFormat: 'JWT'
+        }
+    },
         schemas:{
             id:{
                 type:'number',
                 description:"An id of a client",
                 example: 1
+            },
+            Signin:{
+                type:'object',
+                properties:{
+                    email:{
+                        type:'number',
+                        description:"Email de un cliente",
+                        example:"example@gmail.com"
+                    },
+                    password:{
+                        type:"string",
+                        description:"Contraseña",
+                        example:"deusto"
+                    }
+                }
             },
             Cliente:{
                 type:'object',
@@ -29,6 +51,11 @@ module.exports = {
                         type:"string",
                         description:"El email de un cliente",
                         example:"example@gmail.com"
+                    },
+                    password:{
+                        type:"string",
+                        description:"La contraseña de un cliente",
+                        example:"deusto"
                     },
                     edad:{
                         type:"number",
@@ -54,6 +81,11 @@ module.exports = {
                         type:"string",
                         description:"El email de un cliente",
                         example:"example@gmail.com"
+                    },
+                    password:{
+                        type:"string",
+                        description:"La contraseña de un cliente",
+                        example:"deusto"
                     },
                     edad:{
                         type:"number",

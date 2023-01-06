@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from fastapi import FastAPI, File, UploadFile
 from typing import List
-from schemas import Prenda
+from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,StockUpdate
 from fastapi.responses import RedirectResponse, HTMLResponse
 import os
 import fastapi
@@ -55,6 +55,20 @@ def getPrenda(prenda_id:int):
     )
     return prenda
 
+@app.post("/uploadfiles/{prenda_id}")
+async def create_upload_files(*,prenda_id: int,files: List[UploadFile]=File(...)):
+    try:
+        os.mkdir('./images/{}'.format(prenda_id))
+    except:
+        print("Directorio ya creado")
+    for image in files:
+        with open('./images/{}/{}'.format(prenda_id,image.filename), "wb") as buffer:
+            shutil.copyfileobj(image.file, buffer)
+        redirect_url='http://localhost:8001/prendas/img/{}'.format(prenda_id)
+        prendas = requests.post(
+                    url=redirect_url,
+                    json={'img':'./images/{}/{}'.format(prenda_id,image.filename)}
+        )
 
 @api_router.get("/prendas/{prenda_id}", status_code=200)
 def root(*, prenda_id:int,request: Request) -> dict:
@@ -67,8 +81,74 @@ def getImg(*, prenda_id:int,request: Request) -> FileResponse:
     # #print("{}".format(prendas))
     # return prendas
 
+@api_router.get("/prendas/", status_code=200)
+def root(*, request: Request) -> dict:
+    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
+    # prendas = requests.get(
+    #             url=redirect_url
+    # )
+    # prendas_json=prendas.json()
+    # prenda=Prenda(
+    #     id_prenda=prendas_json['id_prenda'],
+    #     precio=prendas_json['precio'],
+    #     description=prendas_json['description'],
+    #     nombre=prendas_json['nombre'],
+    #     img=prendas_json['img'],
+    #     marca=prendas_json['nombre'],
+    #     stocks=prendas_json['stocks']
+    # )
+    return RedirectResponse('http://localhost:8001/prendas')
 
+@api_router.delete("/prendas/{prenda_id}", status_code=201)
+def delete_prenda(*, prenda_id: int) -> dict:
+    return RedirectResponse('http://localhost:8001/prendas/{}'.format(prenda_id))
 
+@api_router.post("/prendas/", status_code=200)
+def root(*, prenda_in:PrendasCreate) -> dict:
+    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
+    # prendas = requests.get(
+    #             url=redirect_url
+    # )
+    # prendas_json=prendas.json()
+    # prenda=Prenda(
+    #     id_prenda=prendas_json['id_prenda'],
+    #     precio=prendas_json['precio'],
+    #     description=prendas_json['description'],
+    #     nombre=prendas_json['nombre'],
+    #     img=prendas_json['img'],
+    #     marca=prendas_json['nombre'],
+    #     stocks=prendas_json['stocks']
+    # )
+    return RedirectResponse('http://localhost:8001/prendas')
+
+@api_router.post("/prendas/update/{prenda_id}", status_code=201, response_model=Prenda)
+def update_prenda(*, prenda_id: int, update:PrendasUpdate) -> dict:
+    url='http://localhost:8001/prendas/{}'.format(prenda_id)
+    return RedirectResponse(url)
+
+@api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda)
+def update_stock(*, prenda_id: int, stock_update:StockUpdate) -> dict:
+    url='http://localhost:8001/prendas/stock/{}'.format(prenda_id)
+    print(url)
+    return RedirectResponse(url)
+
+@api_router.post("/signup/", status_code=200)
+def root(*, user:UserSignup) -> dict:
+    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
+    # prendas = requests.get(
+    #             url=redirect_url
+    # )
+    # prendas_json=prendas.json()
+    # prenda=Prenda(
+    #     id_prenda=prendas_json['id_prenda'],
+    #     precio=prendas_json['precio'],
+    #     description=prendas_json['description'],
+    #     nombre=prendas_json['nombre'],
+    #     img=prendas_json['img'],
+    #     marca=prendas_json['nombre'],
+    #     stocks=prendas_json['stocks']
+    # )
+    return RedirectResponse('http://localhost:4000/clientes/')
 
 
 # New addition, path parameter
