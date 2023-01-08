@@ -16,9 +16,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 import shutil
 import requests
+from typing import Depends
 from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.security import OAuth2PasswordBearer
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
 
 origins = [
     "http://localhost:3000",

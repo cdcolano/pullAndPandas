@@ -89,7 +89,8 @@ router.post('/', async(req,res) => {
             }
           
             const token = jwt.sign(data, jwtSecretKey,{ expiresIn:3600*24});
-            return res.send({token:token,role:0});
+            return res.send({access_token:token,
+                type:"bearer",role:0});
         }catch(error){
 
             return res.status(500).send(error);
@@ -125,7 +126,7 @@ router.post('/:id(\\d+)',verifyToken, (req,res) => {
         },{
             $set:{
                 //TODO
-                name:req.body.name,
+                nombre:req.body.nombre,
                 password:req.body.password,
                 peso:req.body.peso,
                 altura:req.body.altura,

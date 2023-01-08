@@ -8,12 +8,12 @@ import DoneAllIcon from '@mui/icons-material/DoneAll';
 import { FileUploader } from "react-drag-drop-files";
 import {React,useEffect, useState } from "react";
 import './styles/fileUploader.css';
-
+import { API } from './config';
 
 
 export default function CreateProduct() {
     const createProductFunc=async(prenda)=>{
-        return fetch(`http://localhost:8002/prendas`, {
+        return fetch(`${API}/prendas`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -39,7 +39,7 @@ export default function CreateProduct() {
             console.log(body.id_prenda)
             const formData2 = new FormData();
             formData2.append("files", file[0]);
-            return fetch(`http://localhost:8002/uploadfiles/${body.id_prenda}`, {
+            return fetch(`${API}/uploadfiles/${body.id_prenda}`, {
                 method: 'POST',
                 // headers: {
                 //   Accept: 'application/json',

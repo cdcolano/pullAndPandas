@@ -47,7 +47,7 @@ export default function ProductUpdate() {
     }
     const { productId } = useParams();
     const deleteProductFunc=()=>{
-        return fetch(`http://localhost:8002/prendas/${productId}`, {
+        return fetch(`${API}/prendas/${productId}`, {
             method: 'DELETE',
             headers: {
               Accept: 'application/json',
@@ -58,7 +58,7 @@ export default function ProductUpdate() {
     }
     const updateProductFunc=async(prenda)=>{
         console.log(prenda)
-        return fetch(`http://localhost:8002/prendas/update/${productId}`, {
+        return fetch(`${API}/prendas/update/${productId}`, {
         method: 'POST',
         headers: {
           Accept: 'application/json',
@@ -84,7 +84,7 @@ export default function ProductUpdate() {
             if (file[0]){
                 const formData2 = new FormData();
                 formData2.append("files", file[0]);
-                return fetch(`http://localhost:8002/uploadfiles/${productId}`, {
+                return fetch(`${API}/uploadfiles/${productId}`, {
                     method: 'POST',
                     // headers: {
                     //   Accept: 'application/json',
@@ -174,7 +174,7 @@ export default function ProductUpdate() {
                             <label>Descripcion</label>
                                 <Textarea
                                     // placeholder="Type in here…"
-                                    defaultValue="Describe el producto"
+                                    //defaultValue="Describe el producto"
                                     minRows={4}
                                     maxRows={4}
                                     placeholder={product.description}

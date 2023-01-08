@@ -20,10 +20,11 @@ import {
     BrowserRouter as Router,
     useParams
   } from "react-router-dom";
+import { isAuthenticated } from "./index.js";
 
 
 export const read = (productId) => {
-    return fetch(`http://localhost:8001/prendas/${productId}`,{//`${API}/prendas/${productId}`, {
+    return fetch(`${API}/prendas/${productId}`,{//`${API}/prendas/${productId}`, {
       method: 'GET',
     })
       .then((response) => {
@@ -34,10 +35,10 @@ export const read = (productId) => {
 
 export const getTalla=()=>{
     let item=JSON.parse(localStorage.getItem('jwt'))
-    return fetch('http://localhost:8090/recomendador',{
+    return fetch(`${API}/recomendador`,{
     method:'GET',
     headers: {
-        // 'Content-Type': 'application/json',
+        'Content-Type': 'application/json',
         'Authorization':`Bearer ${item.access_token}` ,
     }})
     .then((response) => {
@@ -48,13 +49,13 @@ export const getTalla=()=>{
 
 export const comentar=(data, productId)=>{
     let item=JSON.parse(localStorage.getItem('jwt'))
-    return fetch(`http://localhost:8001/prendas/comentar/${productId}`,{
+    return fetch(`${API}/prendas/comentar/${productId}`,{
         method:'POST',
         headers: {
-            // 'Content-Type': 'application/json',
+            'Content-Type': 'application/json',
             'Authorization':`Bearer ${item.access_token}` ,
         },
-        body: {'text':data.text}})
+        body: JSON.stringify(data)});
 }
 
 
@@ -69,6 +70,7 @@ export default function ProductDetail(props) {
     const [image, setImage] = useState({})
     const[talla, setTalla]=useState(null)
     const[comentariosFormateados,setComentariosFormateados]=useState([]);
+    const[isAdmin, setIsAdmin]=useState(false);
     const[controladorTalla, setControladorTalla]=useState(false)
     const comprarButton=()=>{
         navigate(`/prendas/payment/${productId}`)
@@ -104,6 +106,10 @@ export default function ProductDetail(props) {
         const imageObjectURL = URL.createObjectURL(imageBlob);
         setImage(imageObjectURL);
     }
+    const makeComment=async(data)=>{
+        const texto={"text": data.text}
+        comentar(texto, productId);
+    }
 
     const ChangeStock=(hay) => {
         setHayStock(hay)
@@ -120,11 +126,23 @@ export default function ProductDetail(props) {
     
     useEffect(() => {
        // const [productId,setProductId] = useSearchParams();
+        const auth=isAuthenticated()
+        const ob=JSON.parse(auth)
+        console.log(ob.role)
+        if (ob.role==1){
+            setIsAdmin(true)
+        }
         loadProduct(productId);
         loadTalla();
         //getImage(productId);
     },[null]);
     useEffect(() => {
+        if(product.comentarios){
+            console.log(getComentariosFormateados(product));
+        }
+     },[product]);
+
+     useEffect(() => {
         if(product.comentarios){
             console.log(getComentariosFormateados(product));
         }
@@ -177,7 +195,7 @@ export default function ProductDetail(props) {
                             return stock_tmp.size === option
                         }).quantity>0)
                         }/>
-                        <button onClick={comprarButton} disabled={!hayStock} id={hayStock ? "bSignIn": "bSignInDesactivado"} type="submit" className="btn btn-primary compra-producto">
+                        <button onClick={comprarButton} disabled={(!hayStock) ||isAdmin} id={(hayStock && (!isAdmin)) ? "bSignIn": "bSignInDesactivado"} type="submit" className="btn btn-primary compra-producto">
                             Comprar
                         </button>
                     </div>
@@ -186,11 +204,11 @@ export default function ProductDetail(props) {
           </div>
           <Row className='align-items-center'>
             <Col md="1"></Col>
-            <Col md="2">
-                <p className="valoracionMedia">Valoracion media</p>
+            <Col md="4">
+                <p className="valoracionMedia">Por favor valore nuestro producto</p>
             </Col>
             <Col md="2">
-                <StarRatingComponent 
+                {/* <StarRatingComponent 
                                     name="rate2" 
                                     editing={false}
                                     style={{
@@ -199,7 +217,20 @@ export default function ProductDetail(props) {
                                     //renderStarIcon={() => <span></span>}
                                     starCount={5}
                                     value={3}
-                                />
+                                /> */}
+                <StarRatingComponent 
+                            name="rate2" 
+                            style={{
+                                fontSize:20
+                            }}
+                            //renderStarIcon={() => <span></span>}
+                            starCount={5}
+                            onStarClick={(nextValue, prevValue, name)=>{
+                               // realizaValoracion(nextValue)
+                            }}//realizaValoracion}
+                        />
+
+
             </Col>
         </Row>
         <Row>
@@ -218,7 +249,7 @@ export default function ProductDetail(props) {
                 //     replies: []
                  }
                 logIn='http:localhost:3000/logInClient'
-                onSubmitAction={(data)=>comentar(data, productId)}
+                onSubmitAction={(data)=>makeComment(data)}
                 >
                 </CommentSection>
             </Col>

@@ -16,7 +16,7 @@ export const signin = (user) => {
   // console.log(name, email, password);
  // return fetch(`${API}/signin`, {
   console.log(user)
-  return fetch(`http://localhost:4000/clientes/signin`, {
+  return fetch(`${API}/signin`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -36,12 +36,13 @@ export const signin = (user) => {
 export const getUser = () => {
   // console.log(name, email, password);
  // return fetch(`${API}/signin`, {
-  return fetch(`http://localhost:4000/clientes/user`, {
+  let item=JSON.parse(localStorage.getItem('jwt'))
+  return fetch(`${API}/clientes/user`, {
     method: 'GET',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
-      authorization:localStorage.getItem('jwt')
+      'Authorization':`Bearer ${item.access_token}` 
     },
   })
     .then((response) => {
@@ -49,16 +50,40 @@ export const getUser = () => {
     })
     .catch((err) => {
       console.log(err);
-      return({error:"Error en el inicio de sesion"})
+      return({error:"Error al acceder al usuario"})
     });
 };
+
+export const updateUser = (data, cliente_id) => {
+  // console.log(name, email, password);
+ // return fetch(`${API}/signin`, {
+  console.log(data)
+  let item=JSON.parse(localStorage.getItem('jwt'))
+  return fetch(`${API}/clientes/${cliente_id}`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+      'Authorization':`Bearer ${item.access_token}` 
+    },
+    body:JSON.stringify(data)
+  })
+    // .then((response) => {
+    //   return response.json();
+    // })
+    .catch((err) => {
+      console.log(err);
+      return({error:"Error en la modificacion de los datos"})
+    });
+};
+
 
 
 export const signup= (user) => {
   // console.log(name, email, password);
  // return fetch(`${API}/signin`, {
   console.log(user)
-  return fetch(`http://localhost:4000/clientes/`, {
+  return fetch(`${API}/signup`, {
     method: 'POST',
     headers: {
       Accept: 'application/json',

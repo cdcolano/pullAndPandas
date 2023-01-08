@@ -43,7 +43,7 @@ export default function Navbar() {
         >
             <ul>
                 <li>
-                    <a href="/loginClient">Login Client</a>
+                    <a href="/signin">Signin</a>
                 </li>
                 <li>
                     <a href="/loginAdmin">Login Admin</a>

@@ -13,6 +13,9 @@ import ProductList from './ProductList';
 import ProductUpdate from './ProductUpdate';
 import UpdateStock from './UpdateStock';
 import UpdateUser from './UpdateUser';
+import ProtectedRoute from './auth/ProtectedRoute';
+import AdminRoute from './auth/AdminRoute';
+import ClientRoute from './auth/ClientRoute';
 
 
 function App() {
@@ -39,17 +42,44 @@ function App() {
     <Router>
     <div className="App">
           <Routes>
-          <Route exact path="/" element={<ProductList />} />
-            <Route exact path="user/update/" element={<UpdateUser />} />
-            <Route exact path="/loginClient" element={<Login />} />
+            <Route exact path="/" element={
+                  <ProtectedRoute>
+                    <ProductList/>
+                </ProtectedRoute>
+            }
+            /> 
+            <Route exact path="user/update/" element={
+                <ClientRoute>
+                    <UpdateUser />
+                </ClientRoute>} />
+            <Route exact path="/signin" element={<Login />} />
             <Route exact path="/loginAdmin" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route path="/prendas/:productId" element={<ProductDetail/>} />
-            <Route path="/prendas/create" element={<CreateProduct/>} />
-            <Route path="/prendas/update/:productId" element={<ProductUpdate/>} />
-            <Route path="/prendas/payment/:productId" element={<Payment/>} />
-            <Route path="/update/stock/:productId" element={<UpdateStock/>} />
-            <Route path="/prendas/admin" element={<CreateProduct/>} />
+            <Route path="/prendas/:productId" element={
+                <ProtectedRoute>
+                  <ProductDetail/>
+                </ProtectedRoute>
+              } />
+            <Route path="/prendas/create" element={
+                <AdminRoute>
+                  <CreateProduct/>
+                </AdminRoute>} />
+            <Route path="/prendas/update/:productId" element={
+            <AdminRoute>
+                <ProductUpdate/>
+            </AdminRoute>}/>
+            <Route path="/prendas/payment/:productId" element={
+                <ClientRoute>
+                    <Payment/>
+                </ClientRoute>} />
+            <Route path="/update/stock/:productId" element={
+                  <AdminRoute>
+                  <UpdateStock/>
+              </AdminRoute>}/>
+            <Route path="/prendas/admin" element={
+             <AdminRoute>
+                <CreateProduct/>
+              </AdminRoute>}/>
           </Routes>
     </div>
   </Router>

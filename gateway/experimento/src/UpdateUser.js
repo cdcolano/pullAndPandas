@@ -5,7 +5,8 @@ import NavbarLogIn from './NavbarLogIn';
 import {Routes, Route, useNavigate} from 'react-router-dom';
 import {useState, useEffect } from "react";
 import { Button } from '@mui/material';
-import { signup, authenticate, isAuthenticated, getUser } from './index';
+import Navbar from './Navbar';
+import { signup, authenticate, isAuthenticated, getUser, updateUser } from './index';
 export default function UpdateUser() {
     const[user, setUser]=useState(null);
     const loadUser = async() => {
@@ -30,28 +31,20 @@ export default function UpdateUser() {
         setValues({ ...values, error: false, [name]: event.target.value });
       };
     const { email,nombre, password, peso, edad, altura} = values;
-    const clickSubmit = (event) => {
+    const clickSubmitUpdate = (event) => {
         event.preventDefault(); // so that browser does not reload
-        console.log("Entra")
         setValues({ ...values, error: false, loading: true });
-        signup({ email,nombre, password ,peso, edad, altura}).then((data) => {
+        updateUser({ email,nombre, password ,peso, edad, altura}, user.id_cliente).then((data) => {
           if (data.error) {
             setValues({ ...values, error: data.error, loading: false });
-          } else {
-            authenticate(data, () => {
-              setValues({
-                ...values,
-              });
-            });
-            setUser(isAuthenticated())
-         }
+          } 
         });
       };
       useEffect(() => {
         // const [productId,setProductId] = useSearchParams();
          loadUser();
          //getImage(productId);
-     });
+     },[null]);
       useEffect(() => {
         // const [productId,setProductId] = useSearchParams();
         if (user!=null){
@@ -62,11 +55,11 @@ export default function UpdateUser() {
     return (
         <div className="TotalContenedor">
             <div className="Contenedor">
-                <NavbarLogIn></NavbarLogIn>
+                <Navbar></Navbar>
                 <div className='auth-wrapper'>
                     <div className='auth-inner'>
                         <form>
-                            <h3>Sign Up</h3>
+                            <h3>Configuracion</h3>
                             <div className="mb-3">
                             <label>Nombre</label>
                             <input 
@@ -118,7 +111,7 @@ export default function UpdateUser() {
 
                             <div className="d-grid">
                             <div className="d-grid">
-                                <Button color="primary"  variant="outlined" startIcon={<DeleteForeverIcon />}>Modificar</Button>
+                                <Button color="primary"  onClick={clickSubmitUpdate} variant="outlined" startIcon={<DeleteForeverIcon />}>Modificar</Button>
                                 {/* TODO CHANFE TO FETCH */}
                             </div>
                             <div className="d-grid">

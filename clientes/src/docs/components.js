@@ -94,6 +94,36 @@ module.exports = {
                     }
                 }
             },
+            ClienteUpdate:{
+                type:'object',
+                properties:{
+                    nombre:{
+                        type:"string",
+                        description:"El nombre de usuario de un cliente",
+                        example:"deusto"
+                    },
+                    peso:{
+                        type:'number',
+                        description:"El peso en kg de un cliente",
+                        example:83.5
+                    },
+                    altura:{
+                        type:"number",
+                        description:"La altura en cm del cliente",
+                        example:185
+                    },
+                    password:{
+                        type:"string",
+                        description:"La contraseña de un cliente",
+                        example:"deusto"
+                    },
+                    edad:{
+                        type:"number",
+                        description:"La edad de un cliente",
+                        example:23
+                    }
+                }
+            },
             Error:{
                 type:'object',
                 properties:{

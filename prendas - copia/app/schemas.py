@@ -64,6 +64,9 @@ class StockUpdate(BaseModel):
     size:str
     quantity:int
 
+class StockDecrement(BaseModel):
+    talla:str
+
 class EmployeeLogon(BaseModel):
     id: int
     password: str

@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
 import time
-from schemas import Prenda, PrendasCreate, PrendasUpdate, StockUpdate, EmployeeLogon, Stock, Comentario,Valoracion,UpdateImage, User, ComentarioInput
+from schemas import Prenda, PrendasCreate, PrendasUpdate, StockUpdate, EmployeeLogon, Stock, Comentario,Valoracion,UpdateImage, User, ComentarioInput, StockDecrement
 import os
 from fastapi import FastAPI, Body, HTTPException, status
 from fastapi.responses import Response, JSONResponse
@@ -185,7 +185,10 @@ def logon_employee(*, employee_logon:EmployeeLogon) -> dict:
     """
     employee=crud.employee.get_by_ID(db_employee, ID=employee_logon.id)
     if employee.password==employee_logon.password:
-        return time.time()*10000000 #* 10000000 para evitar que sea float
+        to_encode = {"time": time.time(), "userId": employee_logon.id}
+        encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
+        return{'access_token':encoded_jwt,
+                'type':"bearer",'role':1}
     else:
         return -1
     # result = [recipe for recipe in PRENDAS if recipe["id"] == recipe_id]
@@ -245,7 +248,8 @@ def update_prenda_img(*, prenda_id: int, update:UpdateImage) -> dict:
 
 #Publica un comentario sobre una prenda
 @api_router.post("/prendas/comentar/{prenda_id}", status_code=201) #response_model=Prenda)
-def update_prenda_comentarios(*, prenda_id: int, update:ComentarioInput, user:User=Depends(get_current_user)) -> dict:
+async def update_prenda_comentarios(*, prenda_id: int, user:User=Depends(get_current_user), update:ComentarioInput) -> dict:
+   
     comentario= Comentario(
         text=update.text,
         email=user.email,
@@ -264,15 +268,17 @@ def update_prenda_valoraciones(*, prenda_id: int, update:Valoracion) -> dict:
     prenda=getPrenda(prenda_id)
     if prenda is not None:
         valorado=False
-        for valoracion in prenda.valoraciones:
-            if valoracion.email==update.email:
-                valorado==True
-        if not valorado:
-            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"valoraciones": update}})
-            return
+        if prenda.valoraciones is not None:
+            for valoracion in prenda.valoraciones:
+                if valoracion['email']==update.email:
+                    valoracion['valor']=update.valor
+                    valorado=True
+            print(prenda.valoraciones)
+        if valorado:
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"valoraciones": update.__dict__}})
         else:
-            return "Producto ya valorado" 
- 
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"valoraciones": update.__dict__}})
+        return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 #@api_router.delete("/prendas/{prenda_id}", status_code=201, response_model=Prenda)
 #def delete_prenda(*, prenda_id: int) -> dict:
@@ -294,6 +300,20 @@ def update_stock(*, prenda_id: int, stock_update:StockUpdate) -> dict:
             prenda.stocks.append(new_stock)
         db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"stocks": [ob.__dict__ for ob in prenda.stocks]}})
         return
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
+
+@api_router.post("/prendas/stock/decrement/{prenda_id}", status_code=201)
+def update_stock(*, prenda_id: int, stock_update:StockDecrement) -> dict:
+    """
+    Create a new recipe (in memory only)
+    """
+    prenda=getPrenda(prenda_id)
+    if prenda!=None:
+        indice = [index for index in range(len(prenda.stocks)) if prenda.stocks[index].size == stock_update.talla]
+        if len(indice)>0:
+            prenda.stocks[indice[0]]=Stock(size=stock_update.talla, quantity=prenda.stocks[indice[0]].quantity-1)
+        db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"stocks": [ob.__dict__ for ob in prenda.stocks]}})
+        return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 @api_router.delete("/prendas/{prenda_id}", status_code=201)

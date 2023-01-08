@@ -7,19 +7,21 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from fastapi import FastAPI, File, UploadFile
 from typing import List
-from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,StockUpdate
+from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,StockUpdate, UserSignin,ComentarioInput,ComprasCreate,EmployeeLogon
 from fastapi.responses import RedirectResponse, HTMLResponse
 import os
 import fastapi
 from fastapi.templating import Jinja2Templates
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request,Depends
 from fastapi.responses import HTMLResponse
 import shutil
 import requests
 from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.security import OAuth2PasswordBearer
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
 origins = [
     "http://localhost:3000",
     "localhost:3000"
@@ -83,20 +85,6 @@ def getImg(*, prenda_id:int,request: Request) -> FileResponse:
 
 @api_router.get("/prendas/", status_code=200)
 def root(*, request: Request) -> dict:
-    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
-    # prendas = requests.get(
-    #             url=redirect_url
-    # )
-    # prendas_json=prendas.json()
-    # prenda=Prenda(
-    #     id_prenda=prendas_json['id_prenda'],
-    #     precio=prendas_json['precio'],
-    #     description=prendas_json['description'],
-    #     nombre=prendas_json['nombre'],
-    #     img=prendas_json['img'],
-    #     marca=prendas_json['nombre'],
-    #     stocks=prendas_json['stocks']
-    # )
     return RedirectResponse('http://localhost:8001/prendas')
 
 @api_router.delete("/prendas/{prenda_id}", status_code=201)
@@ -105,20 +93,6 @@ def delete_prenda(*, prenda_id: int) -> dict:
 
 @api_router.post("/prendas/", status_code=200)
 def root(*, prenda_in:PrendasCreate) -> dict:
-    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
-    # prendas = requests.get(
-    #             url=redirect_url
-    # )
-    # prendas_json=prendas.json()
-    # prenda=Prenda(
-    #     id_prenda=prendas_json['id_prenda'],
-    #     precio=prendas_json['precio'],
-    #     description=prendas_json['description'],
-    #     nombre=prendas_json['nombre'],
-    #     img=prendas_json['img'],
-    #     marca=prendas_json['nombre'],
-    #     stocks=prendas_json['stocks']
-    # )
     return RedirectResponse('http://localhost:8001/prendas')
 
 @api_router.post("/prendas/update/{prenda_id}", status_code=201, response_model=Prenda)
@@ -132,23 +106,49 @@ def update_stock(*, prenda_id: int, stock_update:StockUpdate) -> dict:
     print(url)
     return RedirectResponse(url)
 
-@api_router.post("/signup/", status_code=200)
+@api_router.post("/signup", status_code=201)
 def root(*, user:UserSignup) -> dict:
-    # redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
-    # prendas = requests.get(
-    #             url=redirect_url
-    # )
-    # prendas_json=prendas.json()
-    # prenda=Prenda(
-    #     id_prenda=prendas_json['id_prenda'],
-    #     precio=prendas_json['precio'],
-    #     description=prendas_json['description'],
-    #     nombre=prendas_json['nombre'],
-    #     img=prendas_json['img'],
-    #     marca=prendas_json['nombre'],
-    #     stocks=prendas_json['stocks']
-    # )
     return RedirectResponse('http://localhost:4000/clientes/')
+
+@api_router.post("/signin", status_code=200)
+def root(*, user:UserSignin) -> dict:
+    return RedirectResponse('http://localhost:4000/clientes/signin')
+
+
+
+@api_router.post("/clientes/{cliente_id}", status_code=201)
+def root(*, cliente_id:int, user:UserSignup,token: str= Depends(oauth2_scheme) ) -> dict:
+    return RedirectResponse('http://localhost:4000/clientes/{}'.format(cliente_id))
+
+
+@api_router.get("/clientes/user", status_code=200)
+def root( *, token: str= Depends(oauth2_scheme)) -> dict:
+    return RedirectResponse('http://localhost:4000/clientes/user/')
+
+
+
+@api_router.get("/recomendador", status_code=200)
+def root( *,token: str= Depends(oauth2_scheme)) -> dict:
+    return RedirectResponse('http://localhost:8090/recomendador')
+
+
+
+@api_router.post("/prendas/comentar/{prenda_id}", status_code=201)
+def root(*, prenda_id:int, update:ComentarioInput,token: str= Depends(oauth2_scheme) ) -> dict:
+    return RedirectResponse('http://localhost:8001/prendas/comentar/{}'.format(prenda_id))
+
+@api_router.post("/prendas/comentar/{prenda_id}", status_code=201)
+def root(*, prenda_id:int, update:ComentarioInput,token: str= Depends(oauth2_scheme) ) -> dict:
+    return RedirectResponse('http://localhost:8001/prendas/comentar/{}'.format(prenda_id))
+
+@api_router.post("/compras/", status_code=201)
+def root(*,entrada:ComprasCreate,token: str= Depends(oauth2_scheme) ) -> dict:
+    return RedirectResponse('http://localhost:8006/compras')
+
+@api_router.post("/logon/employee", status_code=201)
+def root(*,entrada:EmployeeLogon ) -> dict:
+    return RedirectResponse('http://localhost:8001/employee/logon/')
+
 
 
 # New addition, path parameter

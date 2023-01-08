@@ -1,12 +1,23 @@
 // Navbar.js
 import "./styles/navbar.css";
 import logo from "./imagenes/logo.png"
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { isAuthenticated } from ".";
 
 
 
 export default function Navbar() {
     const [isNavExpanded, setIsNavExpanded] = useState(false)
+    const [isAdmin, setIsAdmin]=useState(false)
+    useEffect(()=>{
+        const auth=isAuthenticated()
+        if (auth){
+            const ob=JSON.parse(auth)
+            if (ob.role==1){
+                setIsAdmin(true)
+            }
+        }
+    },[null])
     return (
         <nav className="navigation">
             <div className="ContenidoHam">
@@ -43,15 +54,19 @@ export default function Navbar() {
         >
             <ul>
                 <li>
-                    <a href="/home">Home</a>
+                    <a href="/">Products</a>
                 </li>
-                <li>
-                    <a href="/about">About</a>
+                <li style={{
+                   display:isAdmin?'none':'inline' 
+                }}>
+                    <a href="/user/update">Me</a>
+                </li> 
+                <li style={{
+                    display:isAdmin?'inline' :'none'
+                }}>
+                    <a href="/prendas/admin">Create Product</a>
                 </li>
-                <li>
-                    <a href="/contact">Contact</a>
-                </li>
-            </ul>
+            </ul> 
         </div>
         </nav>
     );
