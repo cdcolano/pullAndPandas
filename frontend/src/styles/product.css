@@ -1,0 +1,50 @@
+.colocador{
+   margin-right:20%;
+}
+
+.buscadorTalla{
+    border:none;
+    background-color: inherit;
+    text-decoration-line: underline;
+    font-weight:bold;
+    width: 100%;
+}
+.dudaTalla{
+   display: inline;
+   width:100%;
+   /* margin-right: 3%; */
+}
+
+.compra-producto{
+    width: 100%;
+}
+.replyBtn{
+    display: none;
+}
+.actionsBtn{
+    display: none;
+}
+
+.imgProd{
+    width: 100%;
+    height:100%;
+}
+
+.separador{
+    margin-top: 7%;
+}
+
+.dv-star-rating-star{
+    font-size:30px
+}
+.valoracionMedia{
+    margin-bottom:0
+}
+
+.create-product-popup-content {
+    margin: auto;
+    background: rgb(255, 255, 255);
+    width: 50%;
+    padding: 5px;
+  }
+
