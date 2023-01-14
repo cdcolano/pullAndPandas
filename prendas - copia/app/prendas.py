@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
 import time
-from schemas import Prenda, PrendasCreate, PrendasUpdate, StockUpdate, EmployeeLogon, Stock, Comentario,Valoracion,UpdateImage, User, ComentarioInput, StockDecrement
+from schemas import Prenda, PrendasCreate, PrendasUpdate, StockUpdate, EmployeeLogon, Stock, ValoracionInput,Comentario,Valoracion,UpdateImage, User, ComentarioInput, StockDecrement
 import os
 from fastapi import FastAPI, Body, HTTPException, status
 from fastapi.responses import Response, JSONResponse
@@ -53,8 +53,8 @@ app.add_middleware(
 api_router = APIRouter()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
-
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http://localhost:4000/clientes/signin" )
+oauth2_scheme_admin = OAuth2PasswordBearer(tokenUrl="/employee/logon" )
 
 async def get_current_user(token: str= Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -69,7 +69,7 @@ async def get_current_user(token: str= Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    redirect_url='http://localhost:4000/clientes/{}'.format(userId)
+    redirect_url='http://host.docker.internal:4000/clientes/{}'.format(userId)
     user = requests.get(
                 url=redirect_url).json()
     user_ob=User(
@@ -79,6 +79,20 @@ async def get_current_user(token: str= Depends(oauth2_scheme)):
     )
     print(user_ob)
     return user_ob
+async def get_is_admin(token: str= Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, JWT_SECRET_KEY)#, algorithms=[ALGORITHM])
+        userId = payload.get("employeeId")
+        if userId is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    return 1
 
 #def getPrenda():
     
@@ -91,7 +105,7 @@ def getPrenda(prenda_id):
             description=dictionary['description'],
             nombre=dictionary['nombre'],
             img=dictionary['img'],
-            marca=dictionary['nombre'],
+            marca=dictionary['marca'],
             stocks=dictionary['stocks'],
         )
         try:
@@ -102,6 +116,7 @@ def getPrenda(prenda_id):
             prenda.valoraciones=dictionary['valoraciones']
         except:
             pass
+        print(prenda.comentarios)
         return prenda
     return None
 @api_router.get("/", status_code=200)
@@ -185,12 +200,12 @@ def logon_employee(*, employee_logon:EmployeeLogon) -> dict:
     """
     employee=crud.employee.get_by_ID(db_employee, ID=employee_logon.id)
     if employee.password==employee_logon.password:
-        to_encode = {"time": time.time(), "userId": employee_logon.id}
+        to_encode = {"time": time.time(), "employeeId": employee_logon.id}
         encoded_jwt = jwt.encode(to_encode, JWT_SECRET_KEY, ALGORITHM)
         return{'access_token':encoded_jwt,
                 'type':"bearer",'role':1}
-    else:
-        return -1
+    raise HTTPException(status_code=status.HTTP_403_FORBIDDEN)
+
     # result = [recipe for recipe in PRENDAS if recipe["id"] == recipe_id]
     # if result:
     #     return result[0]
@@ -200,7 +215,7 @@ def logon_employee(*, employee_logon:EmployeeLogon) -> dict:
 
 
 @api_router.post("/prendas/", status_code=201, response_model=Prenda)
-def create_prenda(*, prenda_in: PrendasCreate) -> dict:
+def create_prenda(*, prenda_in: PrendasCreate,isAdmin:int=Depends(get_is_admin)) -> dict:
     """
     Create a new recipe (in memory only)
     """
@@ -226,7 +241,7 @@ def create_prenda(*, prenda_in: PrendasCreate) -> dict:
   #  return prenda_entry
 
 @api_router.post("/prendas/{prenda_id}", status_code=201, response_model=Prenda)
-def update_prenda(*, prenda_id: int, update:PrendasUpdate) -> dict:
+def update_prenda(*, prenda_id: int, update:PrendasUpdate, isAdmin:int=Depends(get_is_admin)) -> dict:
     if getPrenda(prenda_id) is not None:
         db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"precio": update.precio,"marca":update.marca,"nombre": update.nombre,"description": update.description}})
         return getPrenda(prenda_id)
@@ -263,21 +278,22 @@ async def update_prenda_comentarios(*, prenda_id: int, user:User=Depends(get_cur
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 
-@api_router.post("/prendas/{prenda_id}/valorar", status_code=201, response_model=Prenda)
-def update_prenda_valoraciones(*, prenda_id: int, update:Valoracion) -> dict:
+@api_router.post("/prendas/valorar/{prenda_id}", status_code=201, response_model=Prenda)
+def update_prenda_valoraciones(*, prenda_id: int, update:ValoracionInput,user:User=Depends(get_current_user) ) -> dict:
     prenda=getPrenda(prenda_id)
     if prenda is not None:
         valorado=False
         if prenda.valoraciones is not None:
             for valoracion in prenda.valoraciones:
-                if valoracion['email']==update.email:
+                if valoracion['email']==user.email:
                     valoracion['valor']=update.valor
                     valorado=True
             print(prenda.valoraciones)
         if valorado:
-            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"valoraciones": update.__dict__}})
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"valoraciones": prenda.valoraciones}})
         else:
-            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"valoraciones": update.__dict__}})
+            d1={'email':user.email}
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"valoraciones":dict(update.__dict__,**d1)}})
         return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 #@api_router.delete("/prendas/{prenda_id}", status_code=201, response_model=Prenda)
@@ -286,7 +302,7 @@ def update_prenda_valoraciones(*, prenda_id: int, update:Valoracion) -> dict:
       
 
 @api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda)
-def update_stock(*, prenda_id: int, stock_update:StockUpdate) -> dict:
+def update_stock(*, prenda_id: int, stock_update:StockUpdate,isAdmin:int=Depends(get_is_admin)) -> dict:
     """
     Create a new recipe (in memory only)
     """
@@ -299,7 +315,7 @@ def update_stock(*, prenda_id: int, stock_update:StockUpdate) -> dict:
         else:
             prenda.stocks.append(new_stock)
         db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"stocks": [ob.__dict__ for ob in prenda.stocks]}})
-        return
+        return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 @api_router.post("/prendas/stock/decrement/{prenda_id}", status_code=201)
@@ -317,7 +333,7 @@ def update_stock(*, prenda_id: int, stock_update:StockDecrement) -> dict:
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 @api_router.delete("/prendas/{prenda_id}", status_code=201)
-def delete_prenda(*, prenda_id: int) -> dict:
+def delete_prenda(*, prenda_id: int,isAdmin:int=Depends(get_is_admin)) -> dict:
     prenda=getPrenda(prenda_id)
     if prenda is not None:
         db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"inactive": 1}})

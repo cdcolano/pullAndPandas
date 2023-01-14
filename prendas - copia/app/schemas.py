@@ -10,6 +10,9 @@ class Stock(BaseModel):
     size:str
     quantity:int
 
+class ValoracionInput(BaseModel):
+    valor:int
+    
 class Valoracion(BaseModel):
     valor:int
     email:str

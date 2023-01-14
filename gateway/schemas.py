@@ -9,6 +9,9 @@ class Stock(BaseModel):
     size:str
     quantity:int
 
+class ValoracionInput(BaseModel):
+    valor:int
+
 class Valoracion(BaseModel):
     valor:int
     email:str
@@ -55,11 +58,6 @@ class PrendasUpdate(BaseModel):
 class ComprasCreate(BaseModel):
     prenda_id:int
     talla:str
-    class Config:
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: int}
-
 
 class StockUpdate(BaseModel):
     size:str

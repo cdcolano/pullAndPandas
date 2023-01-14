@@ -69,10 +69,10 @@ router.get('/:id(\\d+)', async(req,res) => {
 });
 
 router.post('/', async(req,res) => {
-    // let cliente = req.app.collection.find({ 
-    //     email: req.params.email
-    // });
-    //if (!cliente){
+    let cliente_buscado = req.app.collection.findOne({ 
+        email: req.params.email
+    });
+    if (!cliente){
         let cliente = {
             id_cliente:await req.app.collection.count()+1,
             inactive:0,
@@ -95,10 +95,10 @@ router.post('/', async(req,res) => {
 
             return res.status(500).send(error);
         }
-    // }else{
-    //     console.log(cliente)
-    //     return res.sendStatus(403);
-    // }
+    }else{
+        console.log(cliente)
+        return res.sendStatus(403);
+    }
 });
 
 router.post('/:id(\\d+)',verifyToken, (req,res) => {

@@ -2,7 +2,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
 #TODO CAMBIAR POR HOST DOCKERIZADO
-SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:futbol11@localhost/employee"
+SQLALCHEMY_DATABASE_URI = "mysql+pymysql://root:root@db:3306/employee"
 
 
 engine = create_engine(

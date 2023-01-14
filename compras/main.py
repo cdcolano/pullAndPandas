@@ -17,7 +17,6 @@ from jose import jwt,JWTError
 from fastapi.responses import HTMLResponse
 import shutil
 import requests
-from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import pymongo
@@ -63,7 +62,7 @@ app.add_middleware(
 )
 
 def getPrenda(prenda_id:int):
-    redirect_url='http://localhost:8001/prendas/{}'.format(prenda_id)
+    redirect_url='http://host.docker.internal:8001/prendas/{}'.format(prenda_id)
     prendas = requests.get(
                 url=redirect_url
     )
@@ -178,7 +177,7 @@ def getPrenda(prenda_id:int):
 #     return getCompra(compra_id)
 #    # PRENDAS.append(prenda
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http://localhost:4000/clientes/signin" )
 
 
 async def get_current_user(token: str= Depends(oauth2_scheme)):
@@ -198,7 +197,7 @@ async def get_current_user(token: str= Depends(oauth2_scheme)):
 
 
 def reduceStock(prenda_id, talla):
-    redirect_url='http://localhost:8001/prendas/stock/decrement/{}'.format(prenda_id)
+    redirect_url='http://host.docker.internal:8001/prendas/stock/decrement/{}'.format(prenda_id)
     body={'talla': talla}
     prendas = requests.post(
                 url=redirect_url,

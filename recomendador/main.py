@@ -16,7 +16,6 @@ from fastapi.responses import HTMLResponse
 import shutil
 import requests
 from schemas import User
-from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
@@ -64,8 +63,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"]
 )
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
+#"http:host.docker.internal:4000/clientes/signin" 
+#
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http://localhost:4000/clientes/signin" )
 
 
 async def get_current_user(token: str= Depends(oauth2_scheme)):
@@ -81,7 +81,8 @@ async def get_current_user(token: str= Depends(oauth2_scheme)):
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    redirect_url='http://localhost:4000/clientes/{}'.format(userId)
+        #http://clientes-clientes-1:4000/clientes/
+    redirect_url='http://host.docker.internal:4000/clientes/{}'.format(userId)
     user = requests.get(
                 url=redirect_url).json()
     user_ob=User(
