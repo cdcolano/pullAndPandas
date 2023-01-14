@@ -1,0 +1,17 @@
+version: "3"
+
+services:
+  clientes:
+    build: .
+    command: npm start
+    ports:
+      - "4000:4000"
+    volumes:
+      - .:/usr/app
+    networks:
+      - backend
+
+networks:
+  backend:
+    name: backend
+    driver: bridge
