@@ -15,7 +15,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 import shutil
 import requests
-from schemas import User
+from schemas import User, Talla
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
@@ -45,7 +45,9 @@ print(data['size'].unique())
 talla=data[['size']]
 data=data.drop('size', axis=1)
 clf = DecisionTreeClassifier().fit(data, talla)
-
+response_404 = {404: {"description": "Item not found"}}
+response_403= {403:{"description": "Error en el inicio de sesion"}}
+response_401= {401:{"description": "No autorizado"}}
 origins = [
     "http://localhost:3000",
     "localhost:3000"
@@ -97,7 +99,7 @@ async def get_current_user(token: str= Depends(oauth2_scheme)):
 
 
 
-@api_router.get("/recomendador", status_code=200)
+@api_router.get("/recomendador", status_code=200, response_model=Talla, responses=response_401)
 def root(user: User=Depends(get_current_user)) -> dict:
    talla=clf.predict([[user.peso,user.edad,user.altura]])[0]
    return {'talla':talla}

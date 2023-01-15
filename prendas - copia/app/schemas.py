@@ -7,38 +7,38 @@ from pydantic import BaseModel, Field
 
 
 class Stock(BaseModel):
-    size:str
-    quantity:int
+    size:str = Field(example="M")
+    quantity:int= Field(example=20)
 
 class ValoracionInput(BaseModel):
-    valor:int
+    valor:int= Field(example=4)
     
 class Valoracion(BaseModel):
-    valor:int
-    email:str
+    valor:int= Field(example=4)
+    email:str= Field(example="example@gmail.com")
 
 class ComentarioInput(BaseModel):
-    text:str
+    text:str=Field(example="Me ha gustado mucho")
 
 class Comentario(BaseModel):
-    text:str
-    email:str
-    fullName:str
-    avatarUrl:str
+    text:str=Field(example="Me ha gustado mucho")
+    email:str=Field(example="example@gmail.com")
+    fullName:str=Field(example="Carlos")
+    avatarUrl:str=Field(example="https://ui-avatars.com/api/name=example&background=random")
 
 class User(BaseModel):
     id_cliente: int
-    email: str
-    nombre: str
+    email: str=Field(example="example@gmail.com")
+    nombre: str=Field(example="Carlos")
 
 class Prenda(BaseModel):
-    id_prenda: int
-    nombre:str
-    description: str
-    precio: float
-    marca:str
+    id_prenda: int= Field(example=1)
+    nombre:str=Field(example="sudadera m1")
+    description: str=Field(example="sudadera de algodon, comoda y transpirable")
+    precio: float=Field(example=20)
+    marca:str=Field(example="nike")
     stocks: List[Stock]
-    img:str
+    img:str=Field(example="./images/2/sudadera.png")
     comentarios:Optional[List[Comentario]]
     valoraciones:Optional[List[Valoracion]]
     class Config:
@@ -47,39 +47,45 @@ class Prenda(BaseModel):
         json_encoders = {ObjectId: int}
 
 class UpdateImage(BaseModel):
-    img:str
+    img:str=Field(example="./images/2/sudadera.png")
 
 class PrendasCreate(BaseModel):
-    description: str
-    precio: float
-    nombre:str
-    marca:str
+    description: str=Field(example="sudadera de algodon, comoda y transpirable")
+    precio: float=Field(example=20)
+    nombre:str=Field(example="sudadera m1")
+    marca:str=Field(example="nike")
+
     # img:str
     # stocks: List[Stock]
 
 class PrendasUpdate(BaseModel):
-    description: str
-    precio: float
-    nombre:str
-    marca:str
+    # description: str
+    # precio: float
+    # nombre:str
+    # marca:str
+    description: str=Field(example="sudadera de algodon, comoda y transpirable")
+    precio: float=Field(example=20)
+    nombre:str=Field(example="sudadera m1")
+    marca:str=Field(example="nike")
 
 class StockUpdate(BaseModel):
-    size:str
-    quantity:int
+    size:str = Field(example="M")
+    quantity:int= Field(example=20)
+
 
 class StockDecrement(BaseModel):
-    talla:str
+    talla:str= Field(example="M")
 
 class EmployeeLogon(BaseModel):
-    id: int
-    password: str
+    id: int= Field(example=1)
+    password: str= Field(example="pass1")
 
 class EmployeeCreate(BaseModel):
-    id: int
-    password: str
+    id: int= Field(example=1)
+    password: str= Field(example="pass1")
 
 
 class EmployeeUpdate(BaseModel):
-    password: str
+    password: str= Field(example="pass1")
 
 

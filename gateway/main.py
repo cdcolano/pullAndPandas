@@ -7,7 +7,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, Field, EmailStr
 from fastapi import FastAPI, File, UploadFile
 from typing import List
-from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,ValoracionInput,StockUpdate, UserSignin,ComentarioInput,ComprasCreate,EmployeeLogon
+from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,ValoracionInput,StockUpdate, UserSignin,ComentarioInput,ComprasCreate,EmployeeLogon, Compra
 from fastapi.responses import RedirectResponse, HTMLResponse
 import os
 import fastapi
@@ -21,6 +21,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
 
+response_404 = {404: {"description": "Item not found"}}
+response_403= {403:{"description": "Error en el inicio de sesion"}}
+response_401= {401:{"description": "No autorizado"}}
+response_400= {400:{"description": "No autorizado"}}
+response_500={500:{"description":"Error en el servidor"}}
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="http:localhost:4000/clientes/signin" )
 oauth2_scheme_admin = OAuth2PasswordBearer(tokenUrl="http:localhost:8001/employee/logon")
 origins = [
@@ -73,36 +78,35 @@ async def create_upload_files(*,prenda_id: int,files: List[UploadFile]=File(...)
                     json={'img':'./images/{}/{}'.format(prenda_id,image.filename)}
         )
 
-@api_router.get("/prendas/{prenda_id}", status_code=200)
+@api_router.get("/prendas/{prenda_id}", status_code=200,response_model=Prenda, responses=response_404)
 def root(*, prenda_id:int,request: Request) -> dict:
     return RedirectResponse('http://localhost:8001/prendas/{}'.format(prenda_id))
 
 @api_router.get("/prendas/{prenda_id}/img", status_code=200)
 def getImg(*, prenda_id:int,request: Request) -> FileResponse:
     prenda=getPrenda(prenda_id)
-    print(prenda.img)
     return FileResponse(prenda.img)
     # #print("{}".format(prendas))
     # return prendas
 
-@api_router.get("/prendas/", status_code=200)
+@api_router.get("/prendas/", status_code=200, response_model=List[Prenda])
 def root(*, request: Request) -> dict:
     return RedirectResponse('http://localhost:8001/prendas')
 
-@api_router.delete("/prendas/{prenda_id}", status_code=201)
+@api_router.delete("/prendas/{prenda_id}", status_code=200,response_model=Prenda)
 def delete_prenda(*, prenda_id: int, token:str=Depends(oauth2_scheme)) -> dict:
     return RedirectResponse('http://localhost:8001/prendas/{}'.format(prenda_id))
 
-@api_router.post("/prendas/", status_code=200)
+@api_router.post("/prendas/", status_code=200,response_model=Prenda, responses={**response_401})
 def root(*, prenda_in:PrendasCreate,token:str=Depends(oauth2_scheme)) -> dict:
     return RedirectResponse('http://localhost:8001/prendas')
 
-@api_router.post("/prendas/update/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/update/{prenda_id}", status_code=201, response_model=Prenda, responses={**response_401,**response_404})
 def update_prenda(*, prenda_id: int, update:PrendasUpdate, token:str=Depends(oauth2_scheme)) -> dict:
     url='http://localhost:8001/prendas/{}'.format(prenda_id)
     return RedirectResponse(url)
 
-@api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def update_stock(*, prenda_id: int, stock_update:StockUpdate,token:str=Depends(oauth2_scheme)) -> dict:
     url='http://localhost:8001/prendas/stock/{}'.format(prenda_id)
     print(url)
@@ -118,7 +122,7 @@ def root(*, user:UserSignin) -> dict:
 
 
 
-@api_router.post("/clientes/{cliente_id}", status_code=201)
+@api_router.post("/clientes/{cliente_id}", status_code=201, responses={**response_400,**response_404, **response_500})
 def root(*, cliente_id:int, user:UserSignup,token: str= Depends(oauth2_scheme) ) -> dict:
     return RedirectResponse('http://localhost:4000/clientes/{}'.format(cliente_id))
 
@@ -135,23 +139,23 @@ def root( *,token: str= Depends(oauth2_scheme)) -> dict:
 
 
 
-@api_router.post("/prendas/comentar/{prenda_id}", status_code=201)
+@api_router.post("/prendas/comentar/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def root(*, prenda_id:int, update:ComentarioInput,token: str= Depends(oauth2_scheme) ) -> dict:
     return RedirectResponse('http://localhost:8001/prendas/comentar/{}'.format(prenda_id))
 
-@api_router.post("/prendas/valorar/{prenda_id}", status_code=201)
+@api_router.post("/prendas/valorar/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def root(*, prenda_id:int, update:ValoracionInput,token: str= Depends(oauth2_scheme) ) -> dict:
     return RedirectResponse('http://localhost:8001/prendas/valorar/{}'.format(prenda_id))
 
-@api_router.post("/compras/", status_code=201)
+@api_router.post("/compras/", status_code=201,response_model=Compra, responses=response_401)
 def root(*,entrada:ComprasCreate,token: str= Depends(oauth2_scheme) ) -> dict:
     return RedirectResponse('http://localhost:8006/compras')
 
-@api_router.post("/logon/employee", status_code=201)
+@api_router.post("/logon/employee", status_code=201,responses=response_403)
 def root(*,entrada:EmployeeLogon ) -> dict:
     return RedirectResponse('http://localhost:8001/employee/logon/')
 
-@api_router.delete("/clientes/{cliente_id}", status_code=200)
+@api_router.delete("/clientes/{cliente_id}", status_code=200,response_model=Prenda,responses={**response_401,**response_404})
 def delete_prenda(*, cliente_id: int, token:str=Depends(oauth2_scheme)) -> dict:
     return RedirectResponse('http://localhost:4000/clientes/{}'.format(cliente_id))
 

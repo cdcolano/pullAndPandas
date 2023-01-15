@@ -11,7 +11,7 @@ module.exports = {
                     $ref:"#/components/schemas/id"
                 },
                 required:true,
-                description: "A single todo id"
+                description: "A single client id"
             }
         ],
         responses:{
@@ -32,7 +32,7 @@ module.exports = {
                         schema:{
                             $ref:'#/components/schemas/Error',
                             example:{
-                                message:"We can't find the todo",
+                                message:"We can't find the client",
                                 internal_code:"Invalid id"
                             }
                         }

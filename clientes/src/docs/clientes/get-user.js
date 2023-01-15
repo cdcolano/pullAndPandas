@@ -19,19 +19,11 @@ module.exports = {
                     }
                 }
             },
+            '400':{
+                description: "Invalid token"
+            },
             '404':{
                 description: "Client is not found",
-                content:{
-                    'application/json':{
-                        schema:{
-                            $ref:'#/components/schemas/Error',
-                            example:{
-                                message:"We can't find the todo",
-                                internal_code:"Invalid id"
-                            }
-                        }
-                    }
-                }
             }
         }
     }

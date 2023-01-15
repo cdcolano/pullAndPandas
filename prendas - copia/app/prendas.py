@@ -32,6 +32,9 @@ REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 ALGORITHM = "HS256"
 JWT_SECRET_KEY = "gfg_jwt_secret_key"
 
+response_404 = {404: {"description": "Item not found"}}
+response_403= {403:{"description": "Error en el inicio de sesion"}}
+response_401= {401:{"description": "No autorizado"}}
 
 client = pymongo.MongoClient("mongodb+srv://deusto:deusto@cluster0.knpxqxl.mongodb.net/prendas?retryWrites=true&w=majority")
 db = client.Comercial
@@ -119,46 +122,20 @@ def getPrenda(prenda_id):
         print(prenda.comentarios)
         return prenda
     return None
-@api_router.get("/", status_code=200)
-def root(request: Request) -> dict:
-    # p1=Prenda(
-    #     id_prenda=0,
-    #     description="hola",
-    #     precio=10,
-    #     nombre="prueba",
-    #     marca="m1",
-    #     stocks=[])
-    # p2=Prenda(
-    #     id_prenda=0,
-    #     description="hola",
-    #     precio=10,
-    #     nombre="prueba",
-    #     marca="m1",
-    #     stocks=[])
-    # products=[p1,p2]
-    # templates = Jinja2Templates(directory="./")
-    # marcas=['m1,m2']
-    # r=templates.TemplateResponse("lista-productos.html", {'request':request,"products": [ob.__dict__ for ob in products], "marcas": marcas})
-    # return r
-    content = """
-        <body>
-        <form action="/uploadfiles/1" enctype="multipart/form-data" method="post">
-        <input name="files" type="file" multiple>
-        <input type="submit">
-        </form>
-        </body>
-            """
-    return HTMLResponse(content=content)
+
 
 
 # New addition, path parameter
 # https://fastapi.tiangolo.com/tutorial/path-params/
-@api_router.get("/prendas/{prenda_id}", status_code=200)
+@api_router.get("/prendas/{prenda_id}", status_code=200,response_model=Prenda, responses=response_404)
 def fetch_prenda(*, prenda_id: int) -> dict:
     """
     Fetch a single recipe by ID
     """
-    return getPrenda(prenda_id)
+    prenda=getPrenda(prenda_id)
+    if prenda is not None:
+        return getPrenda(prenda_id)
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
 
 @api_router.get("/prendas/", status_code=200, response_model=List[Prenda])
 def fetch_prendas() -> dict:
@@ -193,7 +170,7 @@ def fetch_prendas() -> dict:
 
 # New addition, path parameter
 # https://fastapi.tiangolo.com/tutorial/path-params/
-@api_router.post("/employee/logon/", status_code=200)
+@api_router.post("/employee/logon/", status_code=200, responses=response_403)
 def logon_employee(*, employee_logon:EmployeeLogon) -> dict:
     """
     Fetch a single recipe by ID
@@ -214,7 +191,7 @@ def logon_employee(*, employee_logon:EmployeeLogon) -> dict:
 # the POST request body
 
 
-@api_router.post("/prendas/", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/", status_code=201, response_model=Prenda, responses={**response_401})
 def create_prenda(*, prenda_in: PrendasCreate,isAdmin:int=Depends(get_is_admin)) -> dict:
     """
     Create a new recipe (in memory only)
@@ -240,7 +217,7 @@ def create_prenda(*, prenda_in: PrendasCreate,isAdmin:int=Depends(get_is_admin))
 
   #  return prenda_entry
 
-@api_router.post("/prendas/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/{prenda_id}", status_code=201, response_model=Prenda, responses={**response_401,**response_404})
 def update_prenda(*, prenda_id: int, update:PrendasUpdate, isAdmin:int=Depends(get_is_admin)) -> dict:
     if getPrenda(prenda_id) is not None:
         db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"precio": update.precio,"marca":update.marca,"nombre": update.nombre,"description": update.description}})
@@ -249,7 +226,7 @@ def update_prenda(*, prenda_id: int, update:PrendasUpdate, isAdmin:int=Depends(g
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 
-@api_router.post("/prendas/img/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/img/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def update_prenda_img(*, prenda_id: int, update:UpdateImage) -> dict:
     print(prenda_id)
     if getPrenda(prenda_id) is not None:
@@ -262,7 +239,7 @@ def update_prenda_img(*, prenda_id: int, update:UpdateImage) -> dict:
 
 
 #Publica un comentario sobre una prenda
-@api_router.post("/prendas/comentar/{prenda_id}", status_code=201) #response_model=Prenda)
+@api_router.post("/prendas/comentar/{prenda_id}", status_code=201,response_model=Prenda,responses={**response_401,**response_404})
 async def update_prenda_comentarios(*, prenda_id: int, user:User=Depends(get_current_user), update:ComentarioInput) -> dict:
    
     comentario= Comentario(
@@ -271,14 +248,18 @@ async def update_prenda_comentarios(*, prenda_id: int, user:User=Depends(get_cur
         fullName=user.nombre,
         avatarUrl='https://ui-avatars.com/api/name={}&background=random'.format(user.nombre)
     )
-    if getPrenda(prenda_id) is not None:
-        db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"comentarios": comentario.__dict__}})
+    prenda=getPrenda(prenda_id)
+    if prenda is not None:
+        if prenda.comentarios is not None:
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$push": {"comentarios": comentario.__dict__}})
+        else:
+             db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"comentarios": [comentario.__dict__]}})
         return getPrenda(prenda_id)
  
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
 
-@api_router.post("/prendas/valorar/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/valorar/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def update_prenda_valoraciones(*, prenda_id: int, update:ValoracionInput,user:User=Depends(get_current_user) ) -> dict:
     prenda=getPrenda(prenda_id)
     if prenda is not None:
@@ -289,6 +270,11 @@ def update_prenda_valoraciones(*, prenda_id: int, update:ValoracionInput,user:Us
                     valoracion['valor']=update.valor
                     valorado=True
             print(prenda.valoraciones)
+        else:
+            val={'email':user.email,'valor':update.valor}
+            prenda.valoraciones=[val]
+            db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"valoraciones": prenda.valoraciones}})
+            return getPrenda(prenda_id)
         if valorado:
             db["prendas"].update_one({ "id_prenda": prenda_id },{ "$set": {"valoraciones": prenda.valoraciones}})
         else:
@@ -301,7 +287,7 @@ def update_prenda_valoraciones(*, prenda_id: int, update:ValoracionInput,user:Us
   
       
 
-@api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda)
+@api_router.post("/prendas/stock/{prenda_id}", status_code=201, response_model=Prenda,responses={**response_401,**response_404})
 def update_stock(*, prenda_id: int, stock_update:StockUpdate,isAdmin:int=Depends(get_is_admin)) -> dict:
     """
     Create a new recipe (in memory only)
@@ -318,7 +304,7 @@ def update_stock(*, prenda_id: int, stock_update:StockUpdate,isAdmin:int=Depends
         return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
-@api_router.post("/prendas/stock/decrement/{prenda_id}", status_code=201)
+@api_router.post("/prendas/stock/decrement/{prenda_id}", status_code=201,responses=response_404)
 def update_stock(*, prenda_id: int, stock_update:StockDecrement) -> dict:
     """
     Create a new recipe (in memory only)
@@ -332,7 +318,7 @@ def update_stock(*, prenda_id: int, stock_update:StockDecrement) -> dict:
         return getPrenda(prenda_id)
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Prenda with ID {id} not found")
 
-@api_router.delete("/prendas/{prenda_id}", status_code=201)
+@api_router.delete("/prendas/{prenda_id}", status_code=200, responses={**response_401,**response_404})
 def delete_prenda(*, prenda_id: int,isAdmin:int=Depends(get_is_admin)) -> dict:
     prenda=getPrenda(prenda_id)
     if prenda is not None:

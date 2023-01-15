@@ -69,10 +69,10 @@ router.get('/:id(\\d+)', async(req,res) => {
 });
 
 router.post('/', async(req,res) => {
-    let cliente_buscado = req.app.collection.findOne({ 
-        email: req.params.email
+    let cliente_buscado = await req.app.collection.findOne({ 
+        email: req.body.email
     });
-    if (!cliente){
+    if (!cliente_buscado){
         let cliente = {
             id_cliente:await req.app.collection.count()+1,
             inactive:0,
@@ -96,7 +96,7 @@ router.post('/', async(req,res) => {
             return res.status(500).send(error);
         }
     }else{
-        console.log(cliente)
+        console.log(cliente_buscado)
         return res.sendStatus(403);
     }
 });
@@ -105,7 +105,7 @@ router.post('/:id(\\d+)',verifyToken, (req,res) => {
     let id=parseInt(req.params.id)
     console.log(id)
     if (!id){
-        return res.status(404).send("ID is not numerical")
+        return res.status(500).send("ID is not numerical")
     }
     //find todo.
     let cliente = req.app.collection.findOne({

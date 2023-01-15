@@ -14,14 +14,14 @@ class ValoracionInput(BaseModel):
 
 class Valoracion(BaseModel):
     valor:int
-    email:str
+    email:str=Field(example="example@gmail.com")
 
 class ComentarioInput(BaseModel):
     text:str
 
 class Comentario(BaseModel):
     text:str
-    email:str
+    email:str=Field(example="example@gmail.com")
     fullName:str
     avatarUrl:str
 
@@ -62,15 +62,25 @@ class ComprasCreate(BaseModel):
 class StockUpdate(BaseModel):
     size:str
     quantity:int
+    
+class Compra(BaseModel):
+    id_compra:int=Field(example=1)
+    prenda_id:int=Field(example=1)
+    user_id:int=Field(example=1)
+    talla:str=Field(example="M")
+    class Config:
+        allow_population_by_field_name = True
+        arbitrary_types_allowed = True
+        json_encoders = {ObjectId: int}
 
 
 
 class UserSignin(BaseModel):
-    email: str
+    email: str=Field(example="example@gmail.com")
     password: str
 
 class UserSignup(BaseModel):
-    email: str
+    email: str=Field(example="example@gmail.com")
     nombre:str
     password: str
     peso:float

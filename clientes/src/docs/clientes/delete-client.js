@@ -20,11 +20,14 @@ module.exports = {
             }
           ],
         responses:{
-            '201':{
-                description:"Todo deleted successfully"
+            '200':{
+                description:"Client deleted successfully"
+            },
+            '400':{
+                description: "Invalid token"
             },
             '404':{
-                description:"Todo not found"
+                description:"Client not found"
             },
             '500':{
                 description:"Server error"

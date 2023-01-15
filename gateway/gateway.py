@@ -20,6 +20,7 @@ from typing import Depends
 from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from typing import Union
 
 
 origins = [
@@ -58,7 +59,7 @@ def getPrenda(prenda_id:int):
     return prenda
 
 
-@api_router.get("/prendas/{prenda_id}", status_code=200)
+@api_router.get("/prendas/{prenda_id}", status_code=200, response_model=Union[Prenda,None])
 def root(*, prenda_id:int,request: Request) -> dict:
     return getPrenda(prenda_id=prenda_id)
 

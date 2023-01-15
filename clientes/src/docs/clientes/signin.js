@@ -18,7 +18,10 @@ module.exports = {
             },
             '404':{
                 description: "Client not found"
-            },
+            }, 
+            '403':{
+                description: "Password incorrect"
+            }
         }
    }
  }

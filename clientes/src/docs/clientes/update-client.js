@@ -33,6 +33,9 @@ module.exports = {
             '200':{
                 description: "Client updated successfully"
             },
+            '400':{
+                description: "Invalid token"
+            },
             '404':{
                 description: "Client not found"
             },

@@ -6,7 +6,7 @@ module.exports = {
         parameters:[],
         responses:{
             '200':{
-                description:"Todos were obtained",
+                description:"Clients were obtained",
                 content:{
                     'application/json':{
                         schema:{

@@ -22,7 +22,9 @@ from fastapi.responses import FileResponse
 import pymongo
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.security import OAuth2PasswordBearer
-
+response_404 = {404: {"description": "Item not found"}}
+response_403= {403:{"description": "Error en el inicio de sesion"}}
+response_401= {401:{"description": "No autorizado"}}
 ACCESS_TOKEN_EXPIRE_MINUTES = 30  # 30 minutes
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7 # 7 days
 ALGORITHM = "HS256"
@@ -205,7 +207,7 @@ def reduceStock(prenda_id, talla):
     )
    
 
-@api_router.post("/compras", status_code=201, response_model=Compra)
+@api_router.post("/compras", status_code=201, response_model=Compra, responses=response_401)
 def create_prenda(*, compra_in: ComprasCreate, userId:int=Depends(get_current_user)) -> dict:
     """
     Create a new recipe (in memory only)
