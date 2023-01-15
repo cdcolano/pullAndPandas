@@ -3,7 +3,7 @@ e-commerce for class
 # deustoReventa
 
 
-```
+
 
 _Ejecutar el comando en cada uno de los servicios: clientes, prendas, recomendador, compras_
 
