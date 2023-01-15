@@ -1,22 +1,16 @@
 from fastapi import FastAPI, APIRouter
-import time
 import os
 from fastapi import FastAPI, Body, HTTPException, status
-from fastapi.responses import Response, JSONResponse
 from fastapi.encoders import jsonable_encoder
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import  Field
 from fastapi import FastAPI, File, UploadFile
 from typing import List
 from schemas import Prenda, UserSignup, PrendasCreate, PrendasUpdate,ValoracionInput,StockUpdate, UserSignin,ComentarioInput,ComprasCreate,EmployeeLogon, Compra
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi.responses import RedirectResponse
 import os
-import fastapi
-from fastapi.templating import Jinja2Templates
 from fastapi import FastAPI, Request,Depends
-from fastapi.responses import HTMLResponse
 import shutil
 import requests
-from fastapi.testclient import TestClient
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.security import OAuth2PasswordBearer
