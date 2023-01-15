@@ -10,6 +10,10 @@ _Ejecutar el comando en cada uno de los servicios: clientes, prendas, recomendad
 ```
 docker compose up
 ```
+_Despues instalar las dependencias necesarias para lanzar el gateway_
+```
+pip install -r requirements.txt
+```
 
 _Despues lanzar el gateway ejecutando el siguiente comando en su carpeta_
 ```
