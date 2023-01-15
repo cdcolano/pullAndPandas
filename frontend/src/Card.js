@@ -69,13 +69,13 @@ const useStyles = makeStyles((theme) => ({
 export default function Card ({
   product,
   isAdmin=false,
-  showViewProductButton = true,
-  showAddToCartButton = false,
-  cartUpdate = false,
-  showUpdateBtn=false,
-  showRemoveProductButton = false,
-  setRun = (f) => f, // default value of function
-  run = undefined, // default value of undefined
+  // showViewProductButton = true,
+  // showAddToCartButton = false,
+  // cartUpdate = false,
+  // showUpdateBtn=false,
+  // showRemoveProductButton = false,
+  // setRun = (f) => f, // default value of function
+  // run = undefined, // default value of undefined
 }) {
   const navigate = useNavigate();
   const [redirect, setRedirect] = useState(false);
@@ -237,7 +237,7 @@ export default function Card ({
         <Grid item xs={12} sm={12} md={12}>
           <CardM className={classes.card}>
             {/* {shouldRedirect(redirect)} */}
-            <img src={image}></img>
+            <img style={{width:"100%", height:"400px"}} src={image}></img>
             {/* { <ShowImage item={product} url='product' /> } */}
             <CardContent className={classes.cardContent}>
               <Typography gutterBottom variant='h5' component='h2'>
@@ -251,19 +251,19 @@ export default function Card ({
               {/* {showStock(product.quantity)} */}
               <br></br>
               <Row>
-                {showViewButton(showViewProductButton)}
+                {showViewButton(true)}
               </Row>
               <Row>
                 {showUpdateButton(isAdmin)}
-                </Row>
-                <Row>
-                {showAddToCartBtn(showAddToCartButton)}
-                </Row>
-                <Row>
+              </Row>
+                {/* <Row>
+                {/* {showAddToCartBtn(showAddToCartButton)} 
+                </Row> */}
+              <Row>
                 {showStockUpdateButton(isAdmin)}
               </Row>
   
-              {showCartUpdateOptions(cartUpdate)}
+              {/* {showCartUpdateOptions(cartUpdate)} */}
             </CardContent>
           </CardM>
         </Grid>

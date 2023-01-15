@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import Login from './Login';
 import NavbarLogIn from './NavbarLogIn';
-import {Routes, Route, useNavigate} from 'react-router-dom';
+import {Routes, Route, useNavigate, Navigate} from 'react-router-dom';
 import {useState, useEffect } from "react";
 import { Button } from '@mui/material';
 import Navbar from './Navbar';
@@ -11,6 +11,7 @@ import './styles/createProduct.css'
 import 'reactjs-popup/dist/index.css';
 import { signup, authenticate, isAuthenticated, getUser, updateUser, deleteUser } from './index';
 export default function UpdateUser() {
+    const navigate=useNavigate();
     const[user, setUser]=useState(null);
     const loadUser = async() => {
         getUser().then((data) => {
@@ -31,9 +32,10 @@ export default function UpdateUser() {
         altura:0
     });
     const [openPopup, setOpenPopup]= useState(false);
-    const closePopup = () => setOpenPopup(false);
+    const closePopup = () =>setOpenPopup(false);
     const [openPopupDelete, setOpenPopupDelete]= useState(false);
-    const closePopupDelete = () => setOpenPopup(false);
+    const closePopupDelete = () => {setOpenPopup(false);
+      navigate("/signin")};
     const handleChange = (name) => (event) => {
         setValues({ ...values, error: false, [name]: event.target.value });
       };
@@ -49,10 +51,10 @@ export default function UpdateUser() {
           }
         });
       };
-      const clickSubmitDelete= (event) => {
+      const clickSubmitDelete=(event) => {
         event.preventDefault(); // so that browser does not reload
         setValues({ ...values, error: false, loading: true });
-        deleteUser(user.id_cliente).then((data) => {
+        deleteUser(user.id_cliente).then(async(data) => {
           if (data.error) {
             setValues({ ...values, error: data.error, loading: false });
           }else{

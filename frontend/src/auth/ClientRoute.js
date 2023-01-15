@@ -1,21 +1,25 @@
-import React, { Component ,useEffect} from 'react';
+import React, { Component ,useEffect, useState} from 'react';
 import { Route, Redirect } from 'react-router-dom';
 import { isAuthenticated } from '../index';
 import { useNavigate } from 'react-router-dom';
 
 const ClientRoute = ({children }) => {
     const navigate = useNavigate();
+    const[auth, setAuth]=useState(false)
     // useEffect(() => {
-        const auth=isAuthenticated()
-        if (auth){
-            const object=JSON.parse(auth);
+    useEffect(() => {
+        const jwt=isAuthenticated()
+        if (jwt){
+            const object=JSON.parse(jwt);
             console.log(object);
             if (object.role==0){
-                return children;
+                setAuth(true);
+            }else{
+                navigate('/signin');
             }
         }
-        return navigate('/signin');
-      
+    },[null]);
+    return(children)  
     //  },[null]);
 }
 

@@ -16,7 +16,7 @@ export const readAllProducts = () => {
   };
 
 export default function ProductList(){
-    const role=isAuthenticated().role
+    const [role, setRole]=useState(0)
     const [filteredResults, setFilteredResults] = useState([]);
     const loadProducts = async() => {
         readAllProducts().then((data) => {
@@ -29,8 +29,10 @@ export default function ProductList(){
         );
      }; 
     useEffect(()=>{
-       loadProducts()
-    });
+      loadProducts();
+      const jwt=JSON.parse(isAuthenticated())
+      setRole(jwt.role)
+    },[null]);
     if (!filteredResults[0]){
         //getImage(productId)
         return null
@@ -41,7 +43,7 @@ export default function ProductList(){
     <Row>
     {filteredResults.map((product, i) => (
         <Col key={i} md="4">
-        <Card product={product } isAdmin={role==0 ? "false": "true"}
+        <Card product={product } isAdmin={role==0 ? false: true}
         />
         </Col>
     ))}

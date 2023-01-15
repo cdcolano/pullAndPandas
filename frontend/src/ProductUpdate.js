@@ -99,6 +99,8 @@ export default function ProductUpdate() {
                     // },
                     body: formData2,
                 })
+            }else{
+                return {data:"No ha habido errores"}
             }
            
         })

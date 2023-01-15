@@ -195,7 +195,7 @@ export default function ProductDetail(props) {
             getImage(productId)
         }
      },[product]);
-     if(!user){
+     if(!user && !isAdmin){
         return null;
      }
   
